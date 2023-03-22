@@ -6,7 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.niwat.mvvm.base.BaseViewModel
-import me.niwat.mvvm.data.models.Card
+import me.niwat.mvvm.domain.models.Card
 import me.niwat.mvvm.data.network.ServiceResult
 import me.niwat.mvvm.domain.usecase.GetPokemonListUseCase
 

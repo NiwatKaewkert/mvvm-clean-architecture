@@ -1,6 +1,6 @@
 package me.niwat.mvvm.data.repositories
 
-import me.niwat.mvvm.data.models.PokemonListResponseModel
+import me.niwat.mvvm.domain.models.PokemonListResponseModel
 import me.niwat.mvvm.data.network.ClientServices
 import me.niwat.mvvm.domain.repositories.PokedexRepository
 import retrofit2.Response

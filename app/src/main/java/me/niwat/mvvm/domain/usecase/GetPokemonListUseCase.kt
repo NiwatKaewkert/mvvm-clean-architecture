@@ -1,7 +1,7 @@
 package me.niwat.mvvm.domain.usecase
 
 import me.niwat.mvvm.base.BaseUseCase
-import me.niwat.mvvm.data.models.PokemonListResponseModel
+import me.niwat.mvvm.domain.models.PokemonListResponseModel
 import me.niwat.mvvm.data.network.ServiceResult
 import me.niwat.mvvm.data.repositories.PokedexRepositoryImpl
 

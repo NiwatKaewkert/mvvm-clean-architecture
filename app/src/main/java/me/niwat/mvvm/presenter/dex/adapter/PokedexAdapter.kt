@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import me.niwat.mvvm.R
-import me.niwat.mvvm.data.models.Card
+import me.niwat.mvvm.domain.models.Card
 import me.niwat.mvvm.databinding.ItemPokedexBinding
 
 class PokedexAdapter(private val pokedexList: MutableList<Card>) :

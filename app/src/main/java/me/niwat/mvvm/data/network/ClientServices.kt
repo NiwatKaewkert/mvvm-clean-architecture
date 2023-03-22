@@ -1,6 +1,6 @@
 package me.niwat.mvvm.data.network
 
-import me.niwat.mvvm.data.models.PokemonListResponseModel
+import me.niwat.mvvm.domain.models.PokemonListResponseModel
 import retrofit2.Response
 import retrofit2.http.POST
 

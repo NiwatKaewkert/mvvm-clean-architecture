@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import me.niwat.mvvm.base.BaseFragment
-import me.niwat.mvvm.data.models.Card
+import me.niwat.mvvm.domain.models.Card
 import me.niwat.mvvm.databinding.FragmentPokedexBinding
 import me.niwat.mvvm.presenter.dex.adapter.PokedexAdapter
 import org.koin.androidx.viewmodel.ext.android.activityViewModel

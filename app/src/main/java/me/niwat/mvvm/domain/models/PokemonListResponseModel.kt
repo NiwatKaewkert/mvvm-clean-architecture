@@ -1,4 +1,4 @@
-package me.niwat.mvvm.data.models
+package me.niwat.mvvm.domain.models
 
 import com.google.gson.annotations.SerializedName
 
