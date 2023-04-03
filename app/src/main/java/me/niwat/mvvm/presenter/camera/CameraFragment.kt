@@ -22,7 +22,7 @@ import kotlin.math.min
 
 class CameraFragment :
     BaseFragment<FragmentCameraBinding, CameraFragmentViewModel>(FragmentCameraBinding::inflate),
-    ImageAnalysis.Analyzer, SurfaceHolder.Callback {
+    ImageAnalysis.Analyzer {
 
     override val viewModel: CameraFragmentViewModel by activityViewModel()
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -35,18 +35,13 @@ class CameraFragment :
     }
 
     override fun updateUI(view: View, savedInstanceState: Bundle?) {
-        binding.apply {
-            overlay.setZOrderOnTop(true)
-            overlay.holder.setFormat(PixelFormat.TRANSLUCENT)
-            overlay.holder.addCallback(this@CameraFragment)
-        }
         startCamera()
     }
 
     override fun observer() {
         viewModel.isDetected.observe(this) {
             val color = if (it) Color.GREEN else Color.RED
-            changeColor(color)
+            binding.circleBorder.changeBorderColor(color)
         }
     }
 
@@ -104,66 +99,6 @@ class CameraFragment :
                 val imageBitmap = bmp.toCircularBitmap()
                 viewModel.detectFaces(imageBitmap, imageProxy)
             }
-        }
-    }
-
-    override fun surfaceCreated(holder: SurfaceHolder) {
-        this.holder = holder
-    }
-
-    override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
-        this.holder = holder
-        drawFocusRect(Color.RED)
-    }
-
-    override fun surfaceDestroyed(holder: SurfaceHolder) {
-        this.holder = null
-    }
-
-    private fun drawFocusRect(color: Int) {
-        binding.apply {
-            val height: Int = cameraView.height
-            val width: Int = cameraView.width
-
-            val canvas = holder?.lockCanvas()
-            val outerRectangle = RectF(0f, 0f, width.toFloat(), height.toFloat())
-
-            //draw background
-            paint.color = Color.BLACK
-            paint.alpha = 100
-            canvas?.drawRect(outerRectangle, paint)
-
-            //draw circle
-            paint.color = Color.TRANSPARENT
-            paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_OUT)
-            radius = (min(
-                width,
-                height
-            ) / 2 - 100).toFloat()
-            centerX = (width / 2).toFloat()
-            centerY = (height / 3).toFloat()
-
-            canvas?.drawCircle(centerX, centerY, radius, paint)
-
-            //draw stroke
-            paint.style = Paint.Style.STROKE
-            paint.color = color
-            paint.strokeWidth = 10f
-            canvas?.drawCircle(centerX, centerY, radius, paint)
-
-            holder?.unlockCanvasAndPost(canvas)
-        }
-    }
-
-    private fun changeColor(color: Int) {
-        binding.apply {
-            val canvas = holder?.lockCanvas()
-            //draw stroke
-            paint.style = Paint.Style.STROKE
-            paint.color = color
-            paint.strokeWidth = 10f
-            canvas?.drawCircle(centerX, centerY, radius, paint)
-            holder?.unlockCanvasAndPost(canvas)
         }
     }
 

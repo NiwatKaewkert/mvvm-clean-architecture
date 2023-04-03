@@ -33,14 +33,8 @@ fun Bitmap.toCircularBitmap(): Bitmap {
     val height = this.height
     val outputBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
     val path = Path()
-    path.addCircle(
-        (width / 1.5).toFloat(),
-        (height / 2).toFloat(),
-        (min(
-            width,
-            height
-        ) / 2 - 100).toFloat(),
-        Path.Direction.CCW
+    path.addOval(
+        width * .28f, height * .22f, width * .90f, height * .80f, Path.Direction.CCW
     )
     val canvas = Canvas(outputBitmap)
     canvas.clipPath(path)
