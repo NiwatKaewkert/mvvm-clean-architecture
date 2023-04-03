@@ -1,9 +1,6 @@
 package me.niwat.mvvm.presenter.camera
 
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.PixelFormat
-import android.graphics.PorterDuff
+import android.graphics.*
 import android.media.Image
 import android.os.Bundle
 import android.util.Log
@@ -16,20 +13,23 @@ import androidx.fragment.app.Fragment
 import com.google.mlkit.vision.common.InputImage
 import me.niwat.mvvm.base.BaseFragment
 import me.niwat.mvvm.databinding.FragmentCameraBinding
+import me.niwat.mvvm.utils.toBitmap
+import me.niwat.mvvm.utils.toCircularBitmap
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
 import java.util.concurrent.Executor
+import kotlin.math.min
 
 
 class CameraFragment :
     BaseFragment<FragmentCameraBinding, CameraFragmentViewModel>(FragmentCameraBinding::inflate),
     ImageAnalysis.Analyzer, SurfaceHolder.Callback {
 
-    var xOffset: Int = 0
-    var yOffset: Int = 0
-    var boxWidth: Int = 0
-    var boxHeight: Int = 0
-
     override val viewModel: CameraFragmentViewModel by activityViewModel()
+    private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private var holder: SurfaceHolder? = null
+    var radius: Float = 0f
+    var centerX: Float = 0f
+    var centerY: Float = 0f
 
     override fun init() {
     }
@@ -44,6 +44,10 @@ class CameraFragment :
     }
 
     override fun observer() {
+        viewModel.isDetected.observe(this) {
+            val color = if (it) Color.GREEN else Color.RED
+            changeColor(color)
+        }
     }
 
     private fun startCamera() {
@@ -56,8 +60,8 @@ class CameraFragment :
 
                 // Preview
                 val preview = Preview.Builder().build().also {
-                        it.setSurfaceProvider(cameraView.surfaceProvider)
-                    }
+                    it.setSurfaceProvider(cameraView.surfaceProvider)
+                }
 
                 // Select back camera as a default
                 val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
@@ -89,30 +93,31 @@ class CameraFragment :
         return ContextCompat.getMainExecutor(requireContext())
     }
 
-
-    companion object {
-        private var TAG = CameraFragment::class.java.simpleName
-        fun newInstance(): Fragment = CameraFragment()
-    }
-
     @ExperimentalGetImage
     override fun analyze(imageProxy: ImageProxy) {
         val mediaImage: Image? = imageProxy.image
         mediaImage?.let {
             val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
-            viewModel.detectFaces(image, imageProxy)
+            val bmp = image.toBitmap()
+
+            bmp?.let {
+                val imageBitmap = bmp.toCircularBitmap()
+                viewModel.detectFaces(imageBitmap, imageProxy)
+            }
         }
     }
 
     override fun surfaceCreated(holder: SurfaceHolder) {
+        this.holder = holder
     }
 
     override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
-        //Drawing rectangle
-        drawFocusRect(Color.parseColor("#b3dabb"))
+        this.holder = holder
+        drawFocusRect(Color.RED)
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder) {
+        this.holder = null
     }
 
     private fun drawFocusRect(color: Int) {
@@ -120,35 +125,50 @@ class CameraFragment :
             val height: Int = cameraView.height
             val width: Int = cameraView.width
 
-            val left: Int
-            val right: Int
-            val top: Int
-            val bottom: Int
-            var diameter: Int
-            diameter = width
-            if (height < width) {
-                diameter = height
-            }
-            val offset = (0.05 * diameter).toInt()
-            diameter -= offset
-            val canvas = overlay.holder.lockCanvas()
-            canvas.drawColor(0, PorterDuff.Mode.CLEAR)
-            //border's properties
-            val paint = Paint()
+            val canvas = holder?.lockCanvas()
+            val outerRectangle = RectF(0f, 0f, width.toFloat(), height.toFloat())
+
+            //draw background
+            paint.color = Color.BLACK
+            paint.alpha = 100
+            canvas?.drawRect(outerRectangle, paint)
+
+            //draw circle
+            paint.color = Color.TRANSPARENT
+            paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_OUT)
+            radius = (min(
+                width,
+                height
+            ) / 2 - 100).toFloat()
+            centerX = (width / 2).toFloat()
+            centerY = (height / 3).toFloat()
+
+            canvas?.drawCircle(centerX, centerY, radius, paint)
+
+            //draw stroke
             paint.style = Paint.Style.STROKE
             paint.color = color
-            paint.strokeWidth = 5f
-            left = width / 2 - diameter / 3
-            top = height / 2 - diameter / 3
-            right = width / 2 + diameter / 3
-            bottom = height / 2 + diameter / 3
-            xOffset = left
-            yOffset = top
-            boxHeight = bottom - top
-            boxWidth = right - left
-            //Changing the value of x in diameter/x will change the size of the box ; inversely proportionate to x
-            canvas.drawRect(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat(), paint)
-            overlay.holder.unlockCanvasAndPost(canvas)
+            paint.strokeWidth = 10f
+            canvas?.drawCircle(centerX, centerY, radius, paint)
+
+            holder?.unlockCanvasAndPost(canvas)
         }
+    }
+
+    private fun changeColor(color: Int) {
+        binding.apply {
+            val canvas = holder?.lockCanvas()
+            //draw stroke
+            paint.style = Paint.Style.STROKE
+            paint.color = color
+            paint.strokeWidth = 10f
+            canvas?.drawCircle(centerX, centerY, radius, paint)
+            holder?.unlockCanvasAndPost(canvas)
+        }
+    }
+
+    companion object {
+        private var TAG = CameraFragment::class.java.simpleName
+        fun newInstance(): Fragment = CameraFragment()
     }
 }

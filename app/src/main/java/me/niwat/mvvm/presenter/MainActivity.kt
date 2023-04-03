@@ -48,9 +48,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun navigateToLanding() {
-        supportFragmentManager.beginTransaction()
-            .replace(binding.frameLayout.id, LandingFragment.newInstance())
-            .commit()
+        navigateToCamera()
+//        supportFragmentManager.beginTransaction()
+//            .replace(binding.frameLayout.id, LandingFragment.newInstance())
+//            .commit()
     }
 
     fun requestPermission() {
