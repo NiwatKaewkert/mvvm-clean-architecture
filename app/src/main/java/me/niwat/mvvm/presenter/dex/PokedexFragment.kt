@@ -14,10 +14,6 @@ class PokedexFragment :
     override val viewModel: PokedexFragmentViewModel by activityViewModel()
     private val pokedexList: MutableList<Card> = mutableListOf()
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-    }
-
     override fun init() {
         viewModel.getPokemonList()
     }
