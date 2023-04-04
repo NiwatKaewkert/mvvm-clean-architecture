@@ -3,6 +3,7 @@ package me.niwat.mvvm.presenter.camera
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.media.Image
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -29,12 +30,13 @@ class CameraFragment :
     ImageAnalysis.Analyzer {
 
     override val viewModel: CameraFragmentViewModel by activityViewModel()
+    private var mediaPlayer: MediaPlayer? = null
 
-    override fun init() {
-    }
+    override fun init() {}
 
     override fun updateUI(view: View, savedInstanceState: Bundle?) {
         startCamera()
+        setupSound()
     }
 
     override fun observer() {
@@ -67,7 +69,24 @@ class CameraFragment :
         viewModel.rotY.observe(viewLifecycleOwner) { rotY ->
             if (rotY > 45 && viewModel.isDetected.value == true) {
                 viewModel.isDidCondition.value = true
+                viewModel.isPlaySound.value = false
             }
+        }
+
+        viewModel.isPlaySound.observe(viewLifecycleOwner) {
+            if (it) {
+                mediaPlayer?.start()
+            } else {
+                mediaPlayer?.stop()
+            }
+        }
+    }
+
+    private fun setupSound() {
+        mediaPlayer = MediaPlayer.create(requireContext(), R.raw.turn_left)
+        mediaPlayer?.isLooping = true
+        mediaPlayer?.setOnPreparedListener {
+            print("Ready")
         }
     }
 
@@ -150,7 +169,7 @@ class CameraFragment :
                             }
                             viewModel.rotY.value = face.headEulerAngleY
                             Log.d(
-                                "kuy",
+                                "test",
                                 "${face.headEulerAngleY}"
                             )
                         }
