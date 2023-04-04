@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">Face Recognition</string>
     <string name="button_take_photo">Take a photo</string>
+    <string name="suggest_text_position_your_face">Position your face in the oval</string>
+    <string name="suggest_text_turn_left">Look over left shoulder</string>
+    <string name="suggest_text_good">Done</string>
+    <string name="suggest_text_good2">Done condition</string>
 </resources>

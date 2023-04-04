@@ -2,6 +2,7 @@ package me.niwat.mvvm.custom
 
 import android.content.Context
 import android.graphics.*
+import android.graphics.Paint.ANTI_ALIAS_FLAG
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.OvalShape
 import android.util.AttributeSet
@@ -12,60 +13,101 @@ class CircleOverlayView constructor(
     context: Context?,
     attributeSet: AttributeSet?,
 ) : View(context, attributeSet) {
-    private var bitmap: Bitmap? = null
-    private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private var osCanvas = Canvas()
-    private var mDrawable: ShapeDrawable? = null
+    private var ovalBitmap: Bitmap? = null
 
-    override fun dispatchDraw(canvas: Canvas) {
-        super.dispatchDraw(canvas)
-        if (bitmap == null) {
+    private var ovalCanvas = Canvas()
+
+    private var ovalDrawable: ShapeDrawable? = null
+
+    private val ovalPaint = Paint(ANTI_ALIAS_FLAG)
+    private val textPaint = Paint(ANTI_ALIAS_FLAG).apply {
+        textAlign = Paint.Align.CENTER
+        color = Color.WHITE
+        textSize = 60f
+    }
+    private var text: String? = null
+
+
+    override fun onDraw(canvas: Canvas?) {
+        super.onDraw(canvas)
+        canvas?.let {
+            drawBorder(it)
+            drawText(it)
+
+        }
+    }
+
+    private fun drawText(canvas: Canvas) {
+        val xPos = canvas.width / 2
+        val yPos = canvas.height / 1.2
+
+        text?.let {
+            canvas.drawText(
+                it,
+                xPos.toFloat(),
+                yPos.toFloat(),
+                textPaint
+            )
+        }
+    }
+
+    private fun drawBorder(canvas: Canvas) {
+        if (ovalBitmap == null) {
             createWindowFrame()
         }
-        canvas.drawBitmap(bitmap!!, 0f, 0f, null)
+        canvas.drawBitmap(ovalBitmap!!, 0f, 0f, null)
     }
 
     private fun createWindowFrame() {
-        bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        osCanvas = Canvas(bitmap!!)
+        ovalBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        ovalCanvas = Canvas(ovalBitmap!!)
 
         //draw background
         val outerRectangle = RectF(0f, 0f, width.toFloat(), height.toFloat())
 
-        paint.apply {
+        ovalPaint.apply {
             color = Color.BLACK
             alpha = 150
         }
-        osCanvas.drawRect(outerRectangle, paint)
+        ovalCanvas.drawRect(outerRectangle, ovalPaint)
 
         //draw circle
-        paint.apply {
+        ovalPaint.apply {
             color = Color.TRANSPARENT
             xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_OUT)
         }
-        osCanvas.drawOval(width * .10f, height * .10f, width * .90f, height * .70f, paint)
+        ovalCanvas.drawOval(width * .10f, height * .10f, width * .90f, height * .70f, ovalPaint)
 
         //draw stroke
-        mDrawable = ShapeDrawable(OvalShape())
-        mDrawable?.paint?.apply {
+        ovalDrawable = ShapeDrawable(OvalShape())
+        ovalDrawable?.paint?.apply {
             style = Paint.Style.STROKE
             color = Color.RED
             strokeWidth = 10f
         }
-        mDrawable?.setBounds(
+        ovalDrawable?.setBounds(
             (width * .10f).toInt(),
             (height * .10f).toInt(),
             (width * .90f).toInt(),
             (height * .70f).toInt()
         )
-        mDrawable?.draw(osCanvas)
+        ovalDrawable?.draw(ovalCanvas)
     }
 
     fun changeBorderColor(mColor: Int) {
-        mDrawable?.paint?.apply {
+        ovalDrawable?.paint?.apply {
             color = mColor
         }
-        mDrawable?.draw(osCanvas)
+        ovalDrawable?.draw(ovalCanvas)
+        invalidate()
+    }
+
+    fun getBounds(): Rect? {
+        return ovalDrawable?.bounds
+    }
+
+    fun setText(newText: String) {
+        text = newText
         invalidate()
     }
 }
