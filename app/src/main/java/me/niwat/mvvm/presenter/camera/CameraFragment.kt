@@ -67,6 +67,7 @@ class CameraFragment :
         }
 
         viewModel.rotY.observe(viewLifecycleOwner) { rotY ->
+            //45 not base
             if (rotY > 45 && viewModel.isDetected.value == true) {
                 viewModel.isDidCondition.value = true
                 viewModel.isPlaySound.value = false
